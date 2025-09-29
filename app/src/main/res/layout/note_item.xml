@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Usamos CardView para dar un aspecto elevado y con esquinas redondeadas
+    a cada nota de la lista, mejorando la estética.
+-->
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"> <!-- Efecto de pulsación -->
+
+    <LinearLayout
+        android:id="@+id/noteItemContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Título de la Nota -->
+        <TextView
+            android:id="@+id/noteTitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="Título de la Nota de Prueba"/>
+
+        <!-- Fecha y Hora de Captura -->
+        <TextView
+            android:id="@+id/noteDateTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:text="Fecha: 25/10/2023 10:30 AM"/>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

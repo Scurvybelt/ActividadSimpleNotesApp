@@ -1,5 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- El tema base de tu aplicación (probablemente se ve así) -->
+    <style name="Theme.SimpleNotesApp" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Tus personalizaciones de color, etc. -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryVariant">@color/purple_700</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <!-- ... otros items ... -->
+    </style>
 
-    <style name="Theme.SimpleNotesApp" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- ▼▼▼ AÑADE ESTE NUEVO ESTILO ▼▼▼ -->
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.Material3.ActionBar">
+        <!-- Este color controla el color de la flecha de regreso y del título -->
+        <item name="colorOnSurface">@color/white</item>
+    </style>
+    <!-- ▲▲▲ FIN DEL ESTILO AÑADIDO ▲▲▲ -->
+
 </resources>
