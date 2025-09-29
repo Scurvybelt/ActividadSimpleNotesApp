@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id 'kotlin-kapt'
 }
 
 android {
@@ -57,5 +58,12 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1" // O la última versión
     implementation "androidx.activity:activity-ktx:1.8.0" // Para el delegado by viewModels()
     implementation 'com.google.code.gson:gson:2.10.1'
-
+    implementation 'com.google.android.material:material:1.13.0'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.fragment:fragment-ktx:1.8.9'
+    implementation 'androidx.room:room-runtime:2.6.0'
+    kapt 'androidx.room:room-compiler:2.6.0'
+    implementation 'androidx.room:room-ktx:2.6.0'
 }

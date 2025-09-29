@@ -1,68 +1,81 @@
 package com.example.simplenotesapp.ViewModels
 
 import android.app.Application
-import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.AndroidViewModel
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import androidx.lifecycle.viewModelScope
+import com.example.simplenotesapp.Data.NoteDatabase
+import com.example.simplenotesapp.Data.NoteEntity // Importar la nueva entidad
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
-data class Note(val id: Long, val content: String)
+// NOTA: La clase 'Note' debe ser eliminada o movida, pero para mantener la compatibilidad
+// con el adaptador y MainActivity, puedes crear un alias o una clase auxiliar si es necesario.
+// O, más simple, adaptar el adaptador y MainActivity para usar NoteEntity.
+// *Asumiendo que se adaptará el resto del código para usar NoteEntity*
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
-    private val sharedPreferences = application.getSharedPreferences("NotesPrefs", Context.MODE_PRIVATE)
-    private val gson = Gson()
+    // Referencia al DAO
+    private val noteDao = NoteDatabase.getDatabase(application).noteDao()
 
-    // Para la lista de notas
-    private val _notes = MutableLiveData<List<Note>>(emptyList())
-    val notes: LiveData<List<Note>> get() = _notes
+    // LiveData directamente desde Room
+    val notes: LiveData<List<NoteEntity>> = noteDao.getAllNotes()
 
-    // Para el contador de notas
+    // El contador de notas se puede obtener del tamaño de 'notes' en la Activity
+    // Eliminamos _notesCount si ya no es necesario
+
     private val _notesCount = MutableLiveData<Int>(0)
     val notesCount: LiveData<Int> get() = _notesCount
 
-    private var nextNoteId = 0L // Para generar IDs únicos simples
-
     init {
-        loadNotesFromPreferences()
-    }
-
-    fun addNote(noteContent: String) {
-        val currentNotes = _notes.value?.toMutableList() ?: mutableListOf()
-        val newNote = Note(id = nextNoteId++, content = noteContent)
-        currentNotes.add(newNote)
-        _notes.value = currentNotes
-        _notesCount.value = currentNotes.size
-        saveNotesToPreferences()
-    }
-
-    fun clearAllNotes() {
-        _notes.value = emptyList()
-        _notesCount.value = 0
-        saveNotesToPreferences()
-    }
-
-
-
-    private fun saveNotesToPreferences() {
-        val notesJson = gson.toJson(_notes.value)
-        sharedPreferences.edit().putString("notesList", notesJson).apply()
-    }
-
-    private fun loadNotesFromPreferences() {
-        val notesJson = sharedPreferences.getString("notesList", null)
-        if (notesJson != null) {
-            val type = object : TypeToken<List<Note>>() {}.type
-            val loadedNotes: List<Note> = gson.fromJson(notesJson, type)
-            _notes.value = loadedNotes
-            _notesCount.value = loadedNotes.size
-            if (loadedNotes.isNotEmpty()) {
-                nextNoteId = (loadedNotes.maxOfOrNull { it.id } ?: -1L) + 1
-            }
+        // Observar la lista de notas de Room para actualizar el contador
+        notes.observeForever { list ->
+            _notesCount.value = list.size
         }
     }
 
+    // Función modificada para guardar en Room
+    fun addNote(title: String, noteContent: String) {
+        // Validación y generación de título movidas al ViewModel para el guardado
+        val finalTitle = if (title.isBlank()) {
+            noteContent.substringBefore('\n').take(30).trim().ifBlank { "Nueva Nota" }
+        } else {
+            title
+        }
 
+        val timestamp = System.currentTimeMillis()
+        val newNote = NoteEntity(
+            title = finalTitle,
+            content = noteContent,
+            timestamp = timestamp
+        )
 
+        // Usar Coroutine para la operación de base de datos asíncrona
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDao.insert(newNote)
+        }
+    }
+
+    // Nueva función para eliminar una nota por su ID
+    fun deleteNote(noteId: Int) { // Cambiar a Int si NoteEntity usa Int como ID
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDao.deleteById(noteId)
+        }
+    }
+
+    fun clearAllNotes() {
+        viewModelScope.launch(Dispatchers.IO) {
+            noteDao.deleteAll()
+        }
+    }
+
+    // Función auxiliar para formatear el timestamp (se mantiene)
+    fun formatTimestamp(timestamp: Long): String {
+        val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+        return formatter.format(Date(timestamp))
+    }
 }
